@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hexora</title>
+<link rel="stylesheet" href="assets/css/styles.css" />
+<script src="assets/js/vendor/chart.umd.js"></script>
+</head>
+<body data-theme="dark">
+
+<div class="app-shell">
+  <div id="shellRoot"></div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/common.js"></script>
+<script>
+  Shell.mount("dashboard", "Dashboard", "Fleet-wide scan activity and risk posture");
+</script>
+<script src="assets/js/dashboard.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+services:
+  hexora:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: hexora:latest
+    container_name: hexora
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Hexora
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite:////app/storage/hexora.db
+      - STORAGE_DIR=/app/storage
+      - MAX_UPLOAD_SIZE_MB=100
+      - ALLOWED_ORIGINS=*
+      - API_KEY_ENABLED=false
+      # - API_KEY=set-a-strong-secret-here
+    volumes:
+      - hexora_storage:/app/storage
+    restart: unless-stopped
+
+volumes:
+  hexora_storage:
