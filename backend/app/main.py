@@ -59,6 +59,6 @@ app.include_router(reports.router)
 # Frontend (static SPA-ish multi-page site) is served from the same process
 # so the whole app is a single deployable unit. Mounted last so /api/* keeps
 # priority over the catch-all static handler.
-FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 if FRONTEND_DIR.exists():
     app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
