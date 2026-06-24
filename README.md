@@ -8,7 +8,7 @@ I just wanted to build my own version from scratch, understand each concept whil
 
 It doesn't run binaries. It doesn't emulate malware. It just reads bytes, fingerprints the file, extracts whatever metadata it can, looks for suspicious patterns, and tries to answer one question:
 
-> "Does this deserve a closer look?"
+ `"Does this deserve a closer look?"`
 
 #### What it does
 
