@@ -1,9 +1,4 @@
-"""
-Minimal PE (Portable Executable) header parser built directly on `struct`.
-This only ever reads bytes already loaded in memory — it does not load,
-map, relocate, or execute the binary in any way. Malformed input simply
-yields fewer fields; it never raises into caller code paths that matter.
-"""
+
 import struct
 from typing import Optional
 

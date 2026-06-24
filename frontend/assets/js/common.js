@@ -1,4 +1,4 @@
-/* Hexora shared UI behavior — used on every page. */
+/* Hexora shared UI */
 
 const Fmt = {
   bytes(n) {

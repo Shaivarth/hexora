@@ -1,10 +1,4 @@
-"""
-Pure-Python file type sniffing via magic-byte signatures. Deliberately
-avoids any dependency on system libmagic so the app behaves identically
-on any host. Detection is read-only: it inspects header bytes and, for
-zip-based containers, the archive's central directory — it never
-extracts, runs, or interprets file contents as code.
-"""
+
 import zipfile
 from pathlib import Path
 from typing import Tuple

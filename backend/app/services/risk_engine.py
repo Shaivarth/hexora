@@ -1,13 +1,4 @@
-"""
-Heuristic, fully static risk scoring. Every signal here comes from data
-already gathered by the other services (hashing, entropy, signature
-detection, metadata extraction) — the engine itself never touches the
-file again, and nothing it does involves running the sample.
 
-This is intentionally explainable: every point added carries a
-human-readable reason that gets surfaced to the analyst, rather than an
-opaque single number.
-"""
 from app.utils.security import looks_like_double_extension
 
 SUSPICIOUS_FILENAME_KEYWORDS = [

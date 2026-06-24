@@ -38,8 +38,8 @@ class Scan(Base):
     risk_reasons_json = Column(Text, default="[]")
     recommendations_json = Column(Text, default="[]")
 
-    # Free-form extracted metadata (JSON-encoded dict)
+    # Freeform extracted metadata
     metadata_json = Column(Text, default="{}")
 
-    # Timestamps
+    # timestamps
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)

@@ -1,9 +1,4 @@
-"""
-Category-aware metadata extraction. Every branch here is read-only static
-parsing (struct unpacking, zip central-directory listing, regex over raw
-bytes, library-assisted header parsing) — nothing is ever executed,
-imported as code, or rendered.
-"""
+
 import re
 import zipfile
 from pathlib import Path

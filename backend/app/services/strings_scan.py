@@ -1,9 +1,3 @@
-"""
-Read-only static string extraction. Reads up to STRINGS_SCAN_LIMIT_BYTES
-of the file and searches for printable ASCII runs, flagging ones that
-match known attacker tooling / living-off-the-land patterns. This never
-evaluates, imports, or executes anything it finds.
-"""
 import re
 from pathlib import Path
 

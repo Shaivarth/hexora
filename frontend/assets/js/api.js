@@ -1,4 +1,4 @@
-/* Hexora API client — thin wrapper around fetch for every backend route. */
+/* Hexora API client thin wrapper around fetch for every backend route. */
 const Api = (() => {
   const BASE = "/api";
 

@@ -1,9 +1,4 @@
-"""
-Generates a branded, analyst-ready PDF report for a single scan, using
-reportlab Platypus. Pure document generation — does not touch the
-original sample at all, only the stored analysis record.
 
-"""
 import io
 from datetime import datetime, timezone
 

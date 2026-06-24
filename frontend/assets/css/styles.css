@@ -1,11 +1,7 @@
-/* ==========================================================================
-   Hexora — Design System
-   Dark "operations console" theme by default, with a light theme variant.
-   Type: Space Grotesk (display/brand) · IBM Plex Sans (UI/body) · IBM Plex Mono (data)
-   ========================================================================== */
+
 
 :root {
-  /* --- Color: dark theme (default) --- */
+  
   --bg: #000000;
   --bg-elevated: #10171F;
   --bg-panel: #0f1419;
@@ -98,9 +94,7 @@ a:hover { text-decoration: underline; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
 
-/* ==========================================================================
-   App shell
-   ========================================================================== */
+
 
 .app-shell {
   display: grid;
@@ -350,9 +344,7 @@ label.field-label {
   margin-bottom: 6px;
 }
 
-/* ==========================================================================
-   Cards / panels
-   ========================================================================== */
+
 
 .panel {
   background: var(--bg-panel);
@@ -408,9 +400,7 @@ label.field-label {
 .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
 @media (max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
 
-/* ==========================================================================
-   Badges (n level, category)
-   ========================================================================== */
+
 
 .badge {
   display: inline-flex;
@@ -446,9 +436,7 @@ label.field-label {
   text-transform: capitalize;
 }
 
-/* ==========================================================================
-   Tables
-   ========================================================================== */
+
 
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table th {
@@ -488,9 +476,7 @@ label.field-label {
 .table-wrap-empty svg { width: 40px; height: 40px; opacity: 0.4; margin-bottom: 10px; }
 .table-wrap-empty .empty-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
 
-/* ==========================================================================
-   Risk gauge (signature element)
-   ========================================================================== */
+
 
 .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .gauge-svg { width: 220px; height: 150px; overflow: visible; }
@@ -500,9 +486,7 @@ label.field-label {
 .gauge-score { font-family: var(--font-display); font-size: 40px; font-weight: 700; line-height: 1; }
 .gauge-level { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
 
-/* ==========================================================================
-   Risk ledger (indicator rows)
-   ========================================================================== */
+
 
 .ledger { display: flex; flex-direction: column; }
 .ledger-row {
@@ -528,9 +512,6 @@ label.field-label {
   padding-top: 2px;
 }
 
-/* ==========================================================================
-   Upload dropzone
-   ========================================================================== */
 
 .dropzone {
   border: 1.5px dashed var(--border-strong);
@@ -576,9 +557,6 @@ label.field-label {
   100% { top: 100%; }
 }
 
-/* ==========================================================================
-   Hash row / copy buttons
-   ========================================================================== */
 
 .hash-row {
   display: flex;
@@ -600,9 +578,6 @@ label.field-label {
 .copy-btn:hover { color: var(--accent); background: var(--bg-hover); }
 .copy-btn svg { width: 14px; height: 14px; }
 
-/* ==========================================================================
-   Toasts
-   ========================================================================== */
 
 .toast-stack {
   position: fixed; bottom: 22px; right: 22px; z-index: 100;
@@ -627,9 +602,6 @@ label.field-label {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==========================================================================
-   Misc utility
-   ========================================================================== */
 
 .flex-row { display: flex; align-items: center; gap: 10px; }
 .flex-between { display: flex; align-items: center; justify-content: space-between; }

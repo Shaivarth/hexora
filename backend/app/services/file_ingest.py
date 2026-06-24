@@ -1,9 +1,4 @@
-"""
-Single-pass file ingestion: streams an upload to disk in fixed-size chunks
-while simultaneously feeding SHA-256 / SHA-1 / MD5 digests and a byte
-frequency table (for Shannon entropy). The file is never read fully into
-memory and never executed, imported, or shelled out to.
-"""
+
 import hashlib
 import math
 from dataclasses import dataclass, field

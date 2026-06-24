@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ScanSummary(BaseModel):
-    """Lightweight representation used in lists / tables."""
+   
     model_config = ConfigDict(from_attributes=True)
 
     id: str
@@ -21,7 +21,7 @@ class ScanSummary(BaseModel):
 
 
 class ScanDetail(ScanSummary):
-    """Full representation used on the scan result page."""
+    
     model_config = ConfigDict(from_attributes=True)
 
     sha1: str
