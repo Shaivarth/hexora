@@ -1,10 +1,10 @@
 # Hexora
 
-This is a tool that inspects files of any kind without opening them and gets idea of what might be going on inside.
+This is a tool that inspects files of any kind `without executing` them and performs `static analysis` to identify potentially suspicious characteristics.
 
-The concepts behind it are hashing, entropy checks, metadata extraction, signature matching and heuristic scoring, these ideas have been around for years.
+The concepts behind it are `hashing`, `entropy checks`, `metadata extraction`, `signature matching` and `heuristic scoring`, these ideas have been around for years.
 
-I just wanted to build my own version from scratch, understand each concept while building it, and end up with something of my own that I'd actually use myself, so I built [Hexora](https://hexora.shaivarth.com).
+I just wanted to build my own version from scratch, understand each concept while building it, `and end up with something of my own that I'd actually use myself`, so I built [Hexora](https://hexora.shaivarth.com).
 
 It doesn't run binaries. It doesn't emulate malware. It just reads bytes, fingerprints the file, extracts whatever metadata it can, looks for suspicious patterns, and tries to answer one question:
 
