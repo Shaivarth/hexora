@@ -1,5 +1,3 @@
-# Hexora
-
 This is a tool that inspects files of any kind `without executing` them and performs `static analysis` to identify potentially suspicious characteristics.
 
 The concepts behind it are `hashing`, `entropy checks`, `metadata extraction`, `signature matching` and `heuristic scoring`, these ideas have been around for years.
