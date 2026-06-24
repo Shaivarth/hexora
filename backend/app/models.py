@@ -14,6 +14,7 @@ class Scan(Base):
     __tablename__ = "scans"
 
     id = Column(String(32), primary_key=True, default=gen_uuid)
+    session_id = Column(String(64), index=True, nullable=False, default="")
 
     # Identity
     original_filename = Column(String(512), nullable=False)

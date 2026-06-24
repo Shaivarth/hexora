@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,7 @@ SORTABLE_FIELDS = {
 
 @router.get("", response_model=PaginatedScans)
 def list_scans(
+    request: Request,
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     page_size: int = Query(settings.DEFAULT_PAGE_SIZE, ge=1, le=settings.MAX_PAGE_SIZE),
@@ -34,6 +35,18 @@ def list_scans(
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
 ):
     query = db.query(Scan)
+    session_id = request.cookies.get("hexora_session")
+
+    if not session_id:
+        return {
+            "items": [],
+            "total": 0,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": 1,
+        }
+
+    query = query.filter(Scan.session_id == session_id)
 
     if search:
         s = f"%{search.strip()}%"

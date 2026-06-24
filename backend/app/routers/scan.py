@@ -1,6 +1,7 @@
 import json
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Request, Response 
+import secrets
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -36,9 +37,26 @@ def _to_detail_dict(scan: Scan) -> dict:
 
 
 @router.post("", response_model=ScanDetail)
-async def upload_and_scan(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_and_scan(
+    request: Request,
+    response: Response,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
     if not file.filename:
         raise HTTPException(400, "A filename is required.")
+
+    session_id = request.cookies.get("hexora_session")
+
+    if not session_id:
+        session_id = secrets.token_hex(32)
+        response.set_cookie(
+            key="hexora_session",
+            value=session_id,
+            httponly=True,
+            samesite="lax",
+            max_age=60 * 60 * 24 * 365,  # 1 year
+        )
 
     display_name = sanitize_filename(file.filename)
     extension = safe_extension(file.filename)
@@ -83,6 +101,7 @@ async def upload_and_scan(file: UploadFile = File(...), db: Session = Depends(ge
     )
 
     scan = Scan(
+        session_id=session_id,
         original_filename=display_name,
         stored_filename=storage_name,
         file_extension=extension,
@@ -107,8 +126,23 @@ async def upload_and_scan(file: UploadFile = File(...), db: Session = Depends(ge
 
 
 @router.get("/{scan_id}", response_model=ScanDetail)
-def get_scan(scan_id: str, db: Session = Depends(get_db)):
-    scan = db.query(Scan).filter(Scan.id == scan_id).first()
+def get_scan(
+    scan_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    session_id = request.cookies.get("hexora_session")
+
+    scan = (
+        db.query(Scan)
+        .filter(
+            Scan.id == scan_id,
+            Scan.session_id == session_id,
+        )
+        .first()
+    )
+
     if not scan:
         raise HTTPException(404, "Scan not found.")
+
     return _to_detail_dict(scan)
