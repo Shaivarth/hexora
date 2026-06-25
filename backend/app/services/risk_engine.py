@@ -1,4 +1,5 @@
 
+from unicodedata import category
 from app.utils.security import looks_like_double_extension
 
 SUSPICIOUS_FILENAME_KEYWORDS = [
@@ -59,14 +60,18 @@ def assess(
     fname_lower = original_filename.lower()
 
     # --- Entropy -----------------------------------------------------
-    if entropy >= 7.5:
-        risk.add(25, f"Very high Shannon entropy ({entropy}/8.0), consistent with packed, "
+    if category == "executable":  
+        if entropy >= 7.5:
+            risk.add(25, f"Very high Shannon entropy ({entropy}/8.0), consistent with packed, "
                       f"encrypted, or compressed payload data.", "high")
-    elif entropy >= 7.0:
-        risk.add(15, f"Elevated entropy ({entropy}/8.0), above what plain text or typical "
+        elif entropy >= 7.0:
+            risk.add(15, f"Elevated entropy ({entropy}/8.0), above what plain text or typical "
                       f"uncompressed data exhibits.", "medium")
-    elif entropy >= 6.5:
-        risk.add(6, f"Mildly elevated entropy ({entropy}/8.0).", "low")
+        elif entropy >= 6.5:
+            risk.add(6, f"Mildly elevated entropy ({entropy}/8.0).", "low")
+    else:
+        if entropy >= 7.9:
+            risk.add(5, "High entropy detected. This may simply reflect normal compression or encryption and is not, by itself, evidence of malicious behavior.", "low")
 
     # --- Extension / naming tricks ------------------------------------
     if extension_mismatch:
@@ -74,7 +79,7 @@ def assess(
                       f"detected file type ({mime_type}). This is a common disguise tactic.", "high")
 
     if looks_like_double_extension(original_filename):
-        risk.add(25, "Filename uses a double extension pattern (e.g. 'name.pdf.exe') often "
+        risk.add(35, "Filename uses a double extension pattern (e.g. 'name.pdf.exe') often "
                       "used to disguise an executable as a document.", "high")
 
     if any(kw in fname_lower for kw in SUSPICIOUS_FILENAME_KEYWORDS):
@@ -82,7 +87,7 @@ def assess(
                      "(e.g. invoice, urgent, free, crack).", "low")
 
     if claimed_extension in DANGEROUS_EXTENSIONS:
-        risk.add(10, f"File extension '.{claimed_extension}' belongs to a category of "
+        risk.add(25, f"File extension '.{claimed_extension}' belongs to a category of "
                       f"extensions Windows will execute directly.", "medium")
 
     # --- Category baseline --------------------------------------------
