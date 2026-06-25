@@ -8,22 +8,40 @@ const Fmt = {
     return `${(n / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
   },
   dateTime(iso) {
-    const d = new Date(iso);
-    if (isNaN(d)) return iso;
-    return d.toLocaleString(undefined, {
-      year: "numeric", month: "short", day: "numeric",
-      hour: "2-digit", minute: "2-digit",
-    });
-  },
-  relativeTime(iso) {
-    const d = new Date(iso);
-    if (isNaN(d)) return "";
-    const diffSec = Math.round((Date.now() - d.getTime()) / 1000);
-    if (diffSec < 60) return "just now";
-    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
-    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-    return `${Math.floor(diffSec / 86400)}d ago`;
-  },
+  if (!iso) return "";
+
+  const normalized =
+    iso.endsWith("Z") || iso.includes("+") ? iso : iso + "Z";
+
+  const d = new Date(normalized);
+  if (isNaN(d)) return iso;
+
+  return d.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+},
+
+relativeTime(iso) {
+  if (!iso) return "";
+
+  const normalized =
+    iso.endsWith("Z") || iso.includes("+") ? iso : iso + "Z";
+
+  const d = new Date(normalized);
+  if (isNaN(d)) return "";
+
+  const diffSec = Math.round((Date.now() - d.getTime()) / 1000);
+
+  if (diffSec < 60) return "just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  return `${Math.floor(diffSec / 86400)}d ago`;
+},
   truncate(s, n) {
     if (!s) return "";
     return s.length > n ? s.slice(0, n - 1) + "\u2026" : s;

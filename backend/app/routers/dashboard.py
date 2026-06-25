@@ -56,7 +56,7 @@ def get_stats(
 
     recent = (base_query.order_by(Scan.uploaded_at.desc()).limit(8).all())
 
-    # Last 7 days, bucketed by date (UTC).
+    # Last 7 days, bucketed by upload date.
     since = datetime.now(timezone.utc) - timedelta(days=6)
     daily_rows = (base_query.with_entities(Scan.uploaded_at).filter(Scan.uploaded_at >= since.replace(tzinfo=None)).all())
     buckets = defaultdict(int)

@@ -1,6 +1,7 @@
 import io
 import json
 
+from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -32,8 +33,11 @@ def download_report(scan_id: str, db: Session = Depends(get_db)):
         "risk_reasons": json.loads(scan.risk_reasons_json or "[]"),
         "recommendations": json.loads(scan.recommendations_json or "[]"),
         "metadata": json.loads(scan.metadata_json or "{}"),
-        "uploaded_at": scan.uploaded_at.strftime("%Y-%m-%d %H:%M UTC") if scan.uploaded_at else "",
-    }
+        "uploaded_at": (scan.uploaded_at
+                        .replace(tzinfo=ZoneInfo("UTC"))
+                        .astimezone(ZoneInfo("Asia/Kolkata"))
+                        .strftime("%d %b %Y, %I:%M %p IST")
+                        if scan.uploaded_at else ""),}
 
     pdf_bytes = build_report(payload)
     filename = f"Hexora_report_{scan.sha256[:12]}.pdf"

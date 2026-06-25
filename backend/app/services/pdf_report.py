@@ -1,6 +1,7 @@
 
 import io
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -54,7 +55,7 @@ def _header_footer(canvas, doc):
     canvas.setFillColor(MUTED)
     canvas.setFont("Helvetica", 7.5)
     canvas.drawString(18 * mm, 10 * mm,
-                       f"Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
+    f"Generated {datetime.now(ZoneInfo('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M IST')}")
     canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, f"Page {doc.page}")
     canvas.setStrokeColor(colors.HexColor("#D8DEE2"))
     canvas.line(18 * mm, 14 * mm, A4[0] - 18 * mm, 14 * mm)
@@ -144,7 +145,7 @@ def build_report(scan: dict) -> bytes:
     story.append(Paragraph(
         "This report was produced entirely through static analysis. No code from the "
         "submitted file was executed at any point. Static heuristics can produce both "
-        "false positives and false negatives — corroborate with dynamic/sandbox analysis "
+        "false positives and false negatives, corroborate with dynamic/sandbox analysis "
         "and threat-intelligence lookups before taking irreversible action.",
         ss["ReportSub"],
     ))

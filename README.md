@@ -39,7 +39,7 @@ Or without Docker:
 
 ```bash
 cd backend
-python -m venv .venv
+python3 -m venv .venv
 
 # macOS / Linux
 source .venv/bin/activate

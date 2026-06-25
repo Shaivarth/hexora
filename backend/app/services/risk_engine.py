@@ -60,7 +60,7 @@ def assess(
 
     # --- Entropy -----------------------------------------------------
     if entropy >= 7.5:
-        risk.add(25, f"Very high Shannon entropy ({entropy}/8.0) — consistent with packed, "
+        risk.add(25, f"Very high Shannon entropy ({entropy}/8.0), consistent with packed, "
                       f"encrypted, or compressed payload data.", "high")
     elif entropy >= 7.0:
         risk.add(15, f"Elevated entropy ({entropy}/8.0), above what plain text or typical "
@@ -186,7 +186,7 @@ def _build_recommendations(level: str, reasons: list, category: str, metadata: d
         recs.append("Detonate in an isolated sandbox (e.g. CAPEv2, Joe Sandbox, ANY.RUN) before "
                      "drawing further conclusions.")
     elif level == "Medium":
-        recs.append("Treat with caution — verify provenance with the sender/source before opening.")
+        recs.append("Treat with caution, verify provenance with the sender/source before opening.")
     else:
         recs.append("No strong static indicators were found, but static analysis cannot prove a "
                      "file is benign.")
