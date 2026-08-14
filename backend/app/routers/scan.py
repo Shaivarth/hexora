@@ -87,6 +87,7 @@ async def upload_and_scan(
         "sample_strings": string_findings["sample_strings"],
         "scan_truncated": string_findings["truncated"],
     }
+    metadata["hex_sample"] = ingest.header[:512].hex()
 
     assessment = risk_engine.assess(
         original_filename=file.filename,

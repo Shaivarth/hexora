@@ -1,14 +1,12 @@
-
 import io
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
+from datetime import datetime, timezone, timedelta
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    BaseDocTemplate, Frame, NextPageTemplate, PageBreak, PageTemplate,
+    BaseDocTemplate, Frame, PageTemplate,
     Paragraph, Spacer, Table, TableStyle,
 )
 
@@ -22,6 +20,8 @@ RISK_COLORS = {
 }
 INK = colors.HexColor("#1A2630")
 MUTED = colors.HexColor("#5C6B73")
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def _styles():
@@ -54,8 +54,8 @@ def _header_footer(canvas, doc):
 
     canvas.setFillColor(MUTED)
     canvas.setFont("Helvetica", 7.5)
-    canvas.drawString(18 * mm, 10 * mm,
-    f"Generated {datetime.now(ZoneInfo('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M IST')}")
+    now_str = datetime.now(IST).strftime("%Y-%m-%d %H:%M IST")
+    canvas.drawString(18 * mm, 10 * mm, f"Generated {now_str}")
     canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, f"Page {doc.page}")
     canvas.setStrokeColor(colors.HexColor("#D8DEE2"))
     canvas.line(18 * mm, 14 * mm, A4[0] - 18 * mm, 14 * mm)
@@ -67,13 +67,13 @@ def build_report(scan: dict) -> bytes:
     ss = _styles()
 
     frame = Frame(18 * mm, 20 * mm, A4[0] - 36 * mm, A4[1] - 42 * mm, id="main")
-    doc = BaseDocTemplate(buf, pagesize=A4, title=f"Hexora Report — {scan['original_filename']}")
+    doc = BaseDocTemplate(buf, pagesize=A4, title=f"Hexora Report — {_escape(scan['original_filename'])}")
     doc.addPageTemplates([PageTemplate(id="standard", frames=[frame], onPage=_header_footer)])
 
     story = []
 
     story.append(Paragraph("Static Analysis Report", ss["ReportTitle"]))
-    story.append(Paragraph(scan["original_filename"], ss["ReportSub"]))
+    story.append(Paragraph(_escape(scan["original_filename"]), ss["ReportSub"]))
     story.append(Spacer(1, 10))
 
     risk_color = RISK_COLORS.get(scan["risk_level"], MUTED)
@@ -81,7 +81,7 @@ def build_report(scan: dict) -> bytes:
         [[
             Paragraph(f"<b>Risk Score</b><br/><br/><font size=20>{scan['risk_score']}/100</font>", ss["Body"]),
             Paragraph(f"<b>Risk Level</b><br/><br/><font size=16 color='{risk_color.hexval()}'><b>{scan['risk_level']}</b></font>", ss["Body"]),
-            Paragraph(f"<b>Scanned</b><br/><br/>{scan['uploaded_at']}", ss["Body"]),
+            Paragraph(f"<b>Scanned</b><br/><br/>{_escape(scan['uploaded_at'])}", ss["Body"]),
         ]],
         colWidths=[55 * mm, 55 * mm, 65 * mm],
     )
@@ -108,7 +108,7 @@ def build_report(scan: dict) -> bytes:
         ["Shannon entropy", f"{scan['entropy']} / 8.0"],
     ]
     id_table = Table(
-        [[Paragraph(f"<b>{k}</b>", ss["Body"]), Paragraph(v, ss["Mono"])] for k, v in id_rows],
+        [[Paragraph(f"<b>{k}</b>", ss["Body"]), Paragraph(_escape(str(v)), ss["Mono"])] for k, v in id_rows],
         colWidths=[35 * mm, 140 * mm],
     )
     id_table.setStyle(TableStyle([
@@ -125,27 +125,27 @@ def build_report(scan: dict) -> bytes:
     reasons = scan.get("risk_reasons") or []
     if reasons:
         for r in reasons:
-            text = r["text"] if isinstance(r, dict) else r
+            text = r["text"] if isinstance(r, dict) else str(r)
             story.append(Paragraph(f"&bull;&nbsp; {_escape(text)}", ss["RiskBullet"]))
     else:
         story.append(Paragraph("No heuristic risk indicators were triggered.", ss["Body"]))
 
     story.append(Paragraph("Security Recommendations", ss["Section"]))
     for r in scan.get("recommendations") or []:
-        story.append(Paragraph(f"&bull;&nbsp; {_escape(r)}", ss["RiskBullet"]))
+        story.append(Paragraph(f"&bull;&nbsp; {_escape(str(r))}", ss["RiskBullet"]))
 
     metadata = scan.get("metadata") or {}
     if metadata:
-        story.append(Paragraph("Extracted Metadata", ss["Section"]))
+        story.append(Paragraph("Extracted Metadata Summary", ss["Section"]))
         meta_text = _format_metadata(metadata)
-        meta_html = _escape(meta_text).replace("\n", "<br/>").replace("  ", "&nbsp;&nbsp;")
+        meta_html = _escape(meta_text).replace("\n", "<br/>").replace(" ", "&nbsp;")
         story.append(Paragraph(meta_html, ss["Mono"]))
 
     story.append(Spacer(1, 16))
     story.append(Paragraph(
         "This report was produced entirely through static analysis. No code from the "
         "submitted file was executed at any point. Static heuristics can produce both "
-        "false positives and false negatives, corroborate with dynamic/sandbox analysis "
+        "false positives and false negatives; corroborate with dynamic/sandbox analysis "
         "and threat-intelligence lookups before taking irreversible action.",
         ss["ReportSub"],
     ))
@@ -155,6 +155,8 @@ def build_report(scan: dict) -> bytes:
 
 
 def _escape(text: str) -> str:
+    if not isinstance(text, str):
+        text = str(text)
     return (text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
@@ -162,12 +164,21 @@ def _format_metadata(meta: dict, indent: int = 0) -> str:
     lines = []
     prefix = "  " * indent
     for k, v in meta.items():
-        if isinstance(v, dict):
+        if k == "hex_sample":
+            preview = str(v)[:64] + ("..." if len(str(v)) > 64 else "")
+            lines.append(f"{prefix}{k}: {preview}")
+        elif isinstance(v, dict):
             lines.append(f"{prefix}{k}:")
             lines.append(_format_metadata(v, indent + 1))
         elif isinstance(v, list):
-            preview = ", ".join(str(i) for i in v[:6])
-            lines.append(f"{prefix}{k}: [{preview}]" if v else f"{prefix}{k}: []")
+            if v and isinstance(v[0], dict):
+                lines.append(f"{prefix}{k}: ({len(v)} items)")
+            else:
+                preview = ", ".join(str(i) for i in v[:4])
+                lines.append(f"{prefix}{k}: [{preview}]" if v else f"{prefix}{k}: []")
         else:
-            lines.append(f"{prefix}{k}: {v}")
+            val_str = str(v)
+            if len(val_str) > 100:
+                val_str = val_str[:100] + "..."
+            lines.append(f"{prefix}{k}: {val_str}")
     return "\n".join(lines)

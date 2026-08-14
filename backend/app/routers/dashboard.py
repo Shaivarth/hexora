@@ -36,29 +36,27 @@ def get_stats(
 
     base_query = db.query(Scan).filter(Scan.session_id == session_id)
 
-    total_scans = base_query.count()
-    high_risk_count = base_query.filter(Scan.risk_level == "High").count()
-    critical_risk_count = base_query.filter(Scan.risk_level == "Critical").count()
-    avg_score = base_query.with_entities(func.avg(Scan.risk_score)).scalar() or 0.0
-
-    category_rows = (
-        base_query.with_entities(Scan.category, func.count(Scan.id)).group_by(Scan.category).all()
-    )
+    category_rows = base_query.with_entities(Scan.category, func.count(Scan.id)).group_by(Scan.category).all()
     category_distribution = {c: 0 for c in CATEGORIES}
     for cat, count in category_rows:
         category_distribution[cat or "other"] = count
 
-    risk_rows = (base_query.with_entities(Scan.risk_level, func.count(Scan.id)).group_by(Scan.risk_level).all())
+    risk_rows = base_query.with_entities(Scan.risk_level, func.count(Scan.id)).group_by(Scan.risk_level).all()
     risk_distribution = {lvl: 0 for lvl in RISK_LEVELS}
     for lvl, count in risk_rows:
         if lvl in risk_distribution:
             risk_distribution[lvl] = count
 
-    recent = (base_query.order_by(Scan.uploaded_at.desc()).limit(8).all())
+    total_scans = sum(risk_distribution.values())
+    high_risk_count = risk_distribution.get("High", 0)
+    critical_risk_count = risk_distribution.get("Critical", 0)
+    avg_score = base_query.with_entities(func.avg(Scan.risk_score)).scalar() or 0.0
+
+    recent = base_query.order_by(Scan.uploaded_at.desc()).limit(8).all()
 
     # Last 7 days, bucketed by upload date.
     since = datetime.now(timezone.utc) - timedelta(days=6)
-    daily_rows = (base_query.with_entities(Scan.uploaded_at).filter(Scan.uploaded_at >= since.replace(tzinfo=None)).all())
+    daily_rows = base_query.with_entities(Scan.uploaded_at).filter(Scan.uploaded_at >= since.replace(tzinfo=None)).all()
     buckets = defaultdict(int)
     for i in range(7):
         day = (since + timedelta(days=i)).strftime("%Y-%m-%d")
