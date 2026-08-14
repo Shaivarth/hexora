@@ -16,9 +16,17 @@
 
   content.innerHTML = `
     <div class="panel">
+      <div class="chip-group mb-16">
+        <div class="chip active" id="chipAll" onclick="applyPresetFilter('all')">ALL SCANS</div>
+        <div class="chip" id="chipCritical" onclick="applyPresetFilter('critical')">CRITICAL &amp; HIGH RISK</div>
+        <div class="chip" id="chipExec" onclick="applyPresetFilter('executable')">EXECUTABLES</div>
+        <div class="chip" id="chipDocs" onclick="applyPresetFilter('document')">DOCUMENTS</div>
+        <div class="chip" id="chipArchives" onclick="applyPresetFilter('archive')">ARCHIVES</div>
+      </div>
+
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="flex:1;min-width:220px;">
-          <label class="field-label">Search</label>
+        <div style="flex:1;min-width:240px;">
+          <label class="field-label">Search Query</label>
           <div class="input-icon-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
             <input class="input" id="fSearch" placeholder="Filename, SHA-256, SHA-1, or MD5" value="${Fmt.escapeHtml(state.search)}" />
@@ -54,7 +62,7 @@
           <label class="field-label">To</label>
           <input class="input" type="date" id="fTo" style="width:140px;" />
         </div>
-        <button class="btn btn-secondary" id="clearFilters">Clear</button>
+        <button class="btn btn-secondary" id="clearFilters">[ RESET ]</button>
       </div>
     </div>
 
@@ -67,8 +75,8 @@
               <th>Category</th>
               <th class="hash-cell">SHA-256</th>
               <th data-sort="file_size">Size <span class="sort-arrow"></span></th>
-              <th data-sort="risk_score">Risk <span class="sort-arrow"></span></th>
-              <th data-sort="uploaded_at">Scanned <span class="sort-arrow"></span></th>
+              <th data-sort="risk_score">Risk Score <span class="sort-arrow"></span></th>
+              <th data-sort="uploaded_at">Inspected <span class="sort-arrow"></span></th>
             </tr>
           </thead>
           <tbody id="rows"><tr><td colspan="6"><div class="skeleton" style="height:280px;"></div></td></tr></tbody>
@@ -93,17 +101,52 @@
     clearTimeout(searchDebounce);
     searchDebounce = setTimeout(() => { state.search = els.search.value.trim(); state.page = 1; load(); }, 350);
   });
+
   els.risk.addEventListener("change", () => { state.risk_level = els.risk.value; state.page = 1; load(); });
   els.category.addEventListener("change", () => { state.category = els.category.value; state.page = 1; load(); });
   els.from.addEventListener("change", () => { state.date_from = els.from.value; state.page = 1; load(); });
   els.to.addEventListener("change", () => { state.date_to = els.to.value; state.page = 1; load(); });
+  
   document.getElementById("clearFilters").addEventListener("click", () => {
     state.search = ""; state.risk_level = "all"; state.category = "all";
     state.date_from = ""; state.date_to = ""; state.page = 1;
     els.search.value = ""; els.risk.value = "all"; els.category.value = "all";
     els.from.value = ""; els.to.value = "";
+    document.querySelectorAll(".chip-group .chip").forEach(c => c.classList.remove("active"));
+    document.getElementById("chipAll").classList.add("active");
     load();
   });
+
+  window.applyPresetFilter = function(preset) {
+    document.querySelectorAll(".chip-group .chip").forEach(c => c.classList.remove("active"));
+    state.page = 1;
+
+    if (preset === "all") {
+      state.risk_level = "all";
+      state.category = "all";
+      document.getElementById("chipAll").classList.add("active");
+    } else if (preset === "critical") {
+      state.risk_level = "High";
+      state.category = "all";
+      document.getElementById("chipCritical").classList.add("active");
+    } else if (preset === "executable") {
+      state.risk_level = "all";
+      state.category = "executable";
+      document.getElementById("chipExec").classList.add("active");
+    } else if (preset === "document") {
+      state.risk_level = "all";
+      state.category = "document";
+      document.getElementById("chipDocs").classList.add("active");
+    } else if (preset === "archive") {
+      state.risk_level = "all";
+      state.category = "archive";
+      document.getElementById("chipArchives").classList.add("active");
+    }
+
+    els.risk.value = state.risk_level;
+    els.category.value = state.category;
+    load();
+  };
 
   document.querySelectorAll("th[data-sort]").forEach(th => {
     th.addEventListener("click", () => {
@@ -137,17 +180,17 @@
       renderRows(data.items);
       renderPagination(data);
     } catch (err) {
-      els.rows.innerHTML = `<tr><td colspan="6"><div class="table-wrap-empty">Failed to load scan history.</div></td></tr>`;
+      els.rows.innerHTML = `<tr><td colspan="6"><div class="text-center text-muted p-4">Failed to load scan history log.</div></td></tr>`;
     }
   }
 
   function renderRows(items) {
     if (!items.length) {
       els.rows.innerHTML = `<tr><td colspan="6">
-        <div class="table-wrap-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <div class="empty-title">No matching scans</div>
-          <div>Try adjusting your filters or search terms.</div>
+        <div class="text-center text-muted p-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:36px;height:36px;opacity:0.5;margin-bottom:8px;"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <div style="font-weight:600;color:var(--text);">No matching scan records</div>
+          <div style="font-size:12.5px;">Try adjusting search terms or filters.</div>
         </div>
       </td></tr>`;
       return;
@@ -156,7 +199,7 @@
       <tr onclick="window.location.href='result.html?id=${item.id}'">
         <td><div class="filename-cell">${categoryIcon(item.category)}<span>${Fmt.escapeHtml(Fmt.truncate(item.original_filename, 40))}</span></div></td>
         <td><span class="tag">${item.category}</span></td>
-        <td class="hash-cell mono">${item.sha256.slice(0, 16)}…</td>
+        <td class="hash-cell mono" style="font-size:12px;">${item.sha256.slice(0, 16)}…</td>
         <td class="mono text-muted">${Fmt.bytes(item.file_size)}</td>
         <td><span class="${Fmt.riskBadgeClass(item.risk_level)}">${item.risk_level} · ${item.risk_score}</span></td>
         <td class="text-muted">${Fmt.dateTime(item.uploaded_at)}</td>
